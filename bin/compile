@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+DARKNET_SRC_URL="https://codeload.github.com/pjreddie/darknet/zip/master"
+YOLO_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
+
+DARKNET_PATH=$CACHE_DIR/darknet-master
+ZIP_FILENAME=$CACHE_DIR/darknet-master.zip
+
+DESTINATION=$BUILD_DIR/darknet  # `/app/darknet/` inside dyno
+YOLO_V3_WEIGHTS_FILE=$DESTINATION/yolov3.weights
+
+
+# Download and extract Darknet
+if [ ! -d "$DARKNET_PATH" ]; then
+    echo '-----> Downloading Darknet'
+    wget --quiet --continue --output-document "$ZIP_FILENAME" "$DARKNET_SRC_URL"
+
+    echo '-----> Extracting Darknet'
+    unzip -qq "$ZIP_FILENAME" -d $CACHE_DIR
+    rm "$ZIP_FILENAME"
+fi
+
+
+## Build darknet at /app/darknet/
+if [ ! -d "$DESTINATION" ]; then
+    echo '-----> Building Darkent'
+    CURRENT=$(pwd)
+    cd "$DARKNET_PATH"
+    make > /dev/null
+    cd $CURRENT
+
+    echo '-----> Copying files to /app/darkent/'
+    mkdir -p "$DESTINATION"
+    cp "$DARKNET_PATH/darknet" "$DESTINATION/darknet"
+    cp -r "$DARKNET_PATH/cfg" "$DESTINATION/cfg"
+    cp -r "$DARKNET_PATH/data" "$DESTINATION/data"
+fi
+
+
+## Download YOLO V3 Weights
+if [ ! -f "$YOLO_V3_WEIGHTS_FILE" ]; then
+    echo '-----> Downloading yolov3.weights'
+    wget --quiet --output-document "$YOLO_V3_WEIGHTS_FILE" "$YOLO_V3_WEIGHTS_URL"
+fi
