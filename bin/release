@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# bin/release BUILD_DIR
+
+echo "Darknet bin available at /app/darknet/darknet/"
+
