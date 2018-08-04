@@ -8,6 +8,7 @@ DARKNET_SRC_URL="https://codeload.github.com/pjreddie/darknet/zip/master"
 YOLO_V3_WEIGHTS_URL="https://pjreddie.com/media/files/yolov3.weights"
 
 DARKNET_PATH=$CACHE_DIR/darknet-master
+DARKNET_CACHE_BIN=$DARKNET_PATH/darknet
 ZIP_FILENAME=$CACHE_DIR/darknet-master.zip
 
 DESTINATION=$BUILD_DIR/darknet  # `/app/darknet/` inside dyno
@@ -27,14 +28,17 @@ fi
 
 ## Build darknet at /app/darknet/
 if [ ! -d "$DESTINATION" ]; then
-    echo '-----> Building Darkent'
-    CURRENT=$(pwd)
-    cd "$DARKNET_PATH"
-    make > /dev/null
-    cd $CURRENT
+    mkdir -p "$DESTINATION"
+
+    if [ ! -f "$DARKNET_CACHE_BIN" ]; then
+        echo '-----> Building Darkent'
+        CURRENT=$(pwd)
+        cd "$DARKNET_PATH"
+        make > /dev/null
+        cd $CURRENT
+    fi
 
     echo '-----> Copying files to /app/darkent/'
-    mkdir -p "$DESTINATION"
     cp "$DARKNET_PATH/darknet" "$DESTINATION/darknet"
     cp -r "$DARKNET_PATH/cfg" "$DESTINATION/cfg"
     cp -r "$DARKNET_PATH/data" "$DESTINATION/data"
